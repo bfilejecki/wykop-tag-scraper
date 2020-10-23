@@ -3,13 +3,23 @@ import requests
 from config import Config
 from string import Template
 
-TAGS_ENTRIES_BASE_URI_TEMPLATE = Template("https://a2.wykop.pl/Tags/Entries/page/$page/$tag/appkey/$appkey")
+TAGS_ENTRIES_BASE_URI_TEMPLATE = Template("https://a2.wykop.pl/Tags/Entries/$tag/page/$page/appkey/$appkey")
+
+def fetch_all_entries_for_tag(tag):
+    first_page_url = TAGS_ENTRIES_BASE_URI_TEMPLATE.substitute(tag=tag, page=1, appkey=Config.APP_KEY)
+    response = get_for_url(first_page_url)
+
+    
 
 
-def get_entries_for_tag(tag, page=1):
+def fetch_entries_for_tag(tag, page=1):
     u = TAGS_ENTRIES_BASE_URI_TEMPLATE.substitute(tag=tag, page=page, appkey=Config.APP_KEY)
-    h = {"apisign": generate_signature(u)}
-    response = requests.get(url=u, headers=h).json()
+    return get_for_url(u)
+
+
+def get_for_url(url):
+    h = {"apisign": generate_signature(url)}
+    response = requests.get(url=url, headers=h).json()
 
     return response
 
