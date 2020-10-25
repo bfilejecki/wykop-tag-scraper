@@ -14,7 +14,7 @@ def fetch_tag_page(tag, page=1):
     r = _get_for_url_with_retry(u, 3)
     r.raise_for_status
 
-    return r.json
+    return r.json()
 
 
 def _get_for_url_with_retry(url, retry_count):
@@ -33,12 +33,11 @@ def _get_for_url_with_retry(url, retry_count):
 
 def _get_for_url(url):
     h = {"apisign": _generate_signature(url)}
-    response = requests.get(url=url, headers=h, timeout=5).json()
+    response = requests.get(url=url, headers=h, timeout=10)
 
     return response
 
 
 def _generate_signature(endpoint_url):
-    hash_alg = hashlib.md5()
     signature_string = f'{Config.APP_SECRET}{endpoint_url}'
-    return hash_alg.digest(signature_string)
+    return hashlib.md5(signature_string.encode('utf-8')).hexdigest()

@@ -135,3 +135,6 @@ dmypy.json
 
 # Vs code files
 .vscode
+
+# Output files
+*.jsonl
