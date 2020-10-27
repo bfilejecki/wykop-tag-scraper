@@ -3,6 +3,8 @@ import requests
 import logging
 from config import Config
 from string import Template
+from app.model import ApiResponse
+
 
 TAGS_ENTRIES_BASE_URI_TEMPLATE = Template("https://a2.wykop.pl/Tags/Entries/$tag/page/$page/appkey/$appkey")
 
@@ -13,8 +15,17 @@ def fetch_tag_page(tag, page=1):
     u = TAGS_ENTRIES_BASE_URI_TEMPLATE.substitute(tag=tag, page=page, appkey=Config.APP_KEY)
     r = _get_for_url_with_retry(u, 3)
     r.raise_for_status
+    body = r.json()
 
-    return r.json()
+    return ApiResponse(body)
+
+
+def fetch_next_page(url):
+    r = _get_for_url_with_retry(url, 3)
+    r.raise_for_status
+    body = r.json()
+
+    return ApiResponse(body)
 
 
 def _get_for_url_with_retry(url, retry_count):
