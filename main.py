@@ -12,9 +12,9 @@ def main():
     logger.debug("Started fetching")
     start = time.perf_counter()
     if args.pages is not None:
-        scraper.scrape_tag_pages(args.tag, args.output, args.pages)
-    else: 
-        scraper.scrape_tag(args.tag, args.output)
+        scraper.scrape_tag_pages(args.tag, args.output, args.author, args.pages)
+    else:
+        scraper.scrape_tag(args.tag, args.output, args.author)
     end = time.perf_counter()
     logger.debug(f"Finished fetching, took: {(end - start):.3f} seconds")
 
@@ -38,6 +38,7 @@ def configure_argparser():
     parser.add_argument("-o", "--output", help="output file name", default=f"output.{time.time()}.jsonl")
     parser.add_argument("-d", "--debug", help="turn debug logs", action="store_true")
     parser.add_argument("-p", "--pages", help="number of pages to return", type=int)
+    parser.add_argument("-a", "--author", help="filter entries by author")
 
     return parser
 

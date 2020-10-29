@@ -7,14 +7,14 @@ from app.client import fetch_tag_page, fetch_next_page
 logger = logging.getLogger(__name__)
 
 
-def scrape_tag_pages(tag, output_file_name, pages=1):
+def scrape_tag_pages(tag, output_file_name, author, pages=1):
     output_exist = check_if_output_exists(output_file_name)
     with open(output_file_name, 'a+') as f:
         for i in range(1, pages + 1):
             api_response = fetch_tag_page(tag, i)
             if api_response.get_data():
                 logger.debug(f'Fetched {i} page of entries of tag: {tag}')
-                write_entries(api_response.get_data(), f)
+                write_entries(api_response.get_data(), f, author)
             elif api_response.get_error_msg():
                 logger.error(f'Api returned error: {api_response.get_error_msg()}')
                 break
@@ -25,7 +25,7 @@ def scrape_tag_pages(tag, output_file_name, pages=1):
         delete_empty_output(output_file_name)
 
 
-def scrape_tag(tag, output_file_name):
+def scrape_tag(tag, output_file_name, author):
     output_exist = check_if_output_exists(output_file_name)
     with open(output_file_name, 'a+') as f:
         api_response = fetch_tag_page(tag, 1)
@@ -36,7 +36,7 @@ def scrape_tag(tag, output_file_name):
 
         while data:
             logger.debug(f'Fetched {page_num} page of entries of tag: {tag}')
-            write_entries(data, f)
+            write_entries(data, f, author)
             if next_page:
                 api_response = fetch_next_page(next_page)
                 data = api_response.get_data()
@@ -50,12 +50,17 @@ def scrape_tag(tag, output_file_name):
         delete_empty_output(output_file_name)
 
 
-def write_entries(entries, output_file):
+def write_entries(entries, output_file, author):
+    entries = filter_by_author(entries, author) if author else entries
     for entry in entries:
         json.dump(entry, output_file)
         output_file.write('\n')
 
     logger.debug(f'Written {len(entries)} entries')
+
+
+def filter_by_author(entries, author):
+    return [entry for entry in entries if author == entry["author"]["login"]]
 
 
 def check_if_output_exists(output_file_name):
